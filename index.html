@@ -1,0 +1,475 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#ff69b4" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MENU-track</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(to right, #fbd3e9, #bb377d);
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    header, footer {
+      background: #ff69b4;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+    }
+    main {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      max-width: 960px;
+      margin: auto;
+      padding: 1rem;
+    }
+    @media (min-width: 700px) {
+      main {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    section {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 1rem;
+      animation: fadeIn 0.8s ease-in-out;
+    }
+    h2 {
+      color: #d63384;
+    }
+    label, button {
+      display: block;
+      margin: 0.5rem 0;
+    }
+    button, label.button {
+      background-color: #ff69b4;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button.clear-button {
+      background-color: #dc3545;
+    }
+    ul, li {
+      padding-left: 0;
+      list-style-type: none;
+    }
+    .checkbox-group label {
+      display: inline-block;
+      background-color: #ffe4ec;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      margin: 0.3rem 0.3rem 0 0;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.3s;
+    }
+    .checkbox-group input[type="checkbox"] {
+      display: none;
+    }
+    .checkbox-group input[type="checkbox"]:checked + span {
+      background-color: #ffb6c1;
+      border-color: #d63384;
+      font-weight: bold;
+    }
+    .playlist, .challenge, .game, .tip {
+      background: #fce4ec;
+      padding: 0.5rem;
+      border-radius: 8px;
+      margin-top: 0.5rem;
+    }
+    .small-text {
+      font-size: 0.9rem;
+      color: #666;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+<img style="width: 20%;" src="menu.jpg">
+    <h1>🌺Menu-Track </h1>
+    <p>With Mood, Music & Wellness</p>
+  </header>
+
+  <main>
+    <!-- Period & Mood Entry -->
+    <section>
+      <h2>📅 Add New Period & Mood Entry</h2>
+      <form id="entryForm">
+        <label>Period Start Date:
+          <input type="date" id="periodStart" required />
+        </label>
+
+        <label>Cycle Length (default 28 days):
+          <input type="number" id="cycleLength" value="28" min="20" max="40" />
+        </label>
+
+        <label>Symptoms:</label>
+        <div class="checkbox-group" id="symptomsGroup">
+          <label><input type="checkbox" name="symptom" value="cramps" /><span>🤕 Cramps</span></label>
+          <label><input type="checkbox" name="symptom" value="fatigue" /><span>😴 Fatigue</span></label>
+          <label><input type="checkbox" name="symptom" value="bloating" /><span>🤰 Bloating</span></label>
+          <label><input type="checkbox" name="symptom" value="headache" /><span>🤯 Headache</span></label>
+          <label><input type="checkbox" name="symptom" value="mood swings" /><span>😡 Mood Swings</span></label>
+        </div>
+
+        <p><strong>Suggestions:</strong> <span id="liveSuggestions">Select symptoms to see remedies...</span></p>
+
+        <label>Mood Tags:</label>
+        <div id="moodTags" class="checkbox-group">
+          <label><input type="checkbox" value="Irritable" /><span>😠 Irritable</span></label>
+          <label><input type="checkbox" value="Anxious" /><span>😰 Anxious</span></label>
+          <label><input type="checkbox" value="Sad" /><span>😢 Sad</span></label>
+          <label><input type="checkbox" value="Happy" /><span>😊 Happy</span></label>
+          <label><input type="checkbox" value="Calm" /><span>😌 Calm</span></label>
+        </div>
+
+        <button type="submit">Add Entry</button>
+      </form>
+      <p><strong>Advice:</strong> <span id="moodAdvice">Select mood tags to get advice</span></p>
+    </section>
+
+    <!-- Cycle Stage + Indian Playlist -->
+    <section>
+      <h2>🎶 Cycle Stage + Indian Playlist</h2>
+      <p><strong>Current Stage:</strong> <span id="cycleStage">Unknown</span></p>
+      <div class="playlist" id="musicPlaylist">Waiting for input...</div>
+    </section>
+
+    <!-- Predictions -->
+    <section>
+      <h2>🔮 Predictions</h2>
+      <p><strong>Next Period:</strong> <span id="nextPeriodPrediction">Calculating...</span></p>
+      <p><strong>Ovulation:</strong> <span id="ovulationPrediction">Calculating...</span></p>
+      <p><strong>Fertile Window:</strong> <span id="fertileWindowPrediction">Calculating...</span></p>
+    </section>
+
+    <!-- History -->
+    <section>
+      <h2>📚 History</h2>
+      <ul id="periodHistoryList"><li>No entries yet.</li></ul>
+      <button id="clearHistoryBtn" class="clear-button">Clear All</button>
+      <button id="exportBtn">📤 Export</button>
+      <input type="file" id="importFile" accept=".json" hidden />
+      <label for="importFile" class="button">📥 Import</label>
+    </section>
+
+    <!-- Daily Challenge -->
+    <section>
+      <h2>🎯 Daily Wellness Challenge</h2>
+      <div class="challenge" id="dailyChallenge">Loading...</div>
+    </section>
+
+    <!-- Mood Quiz Game -->
+    <section>
+      <h2>🧠 Mood Quiz Game</h2>
+      <div class="game" id="moodGame">
+        <p>How are you feeling right now?</p>
+        <button onclick="playMoodGame('Happy')">😊 Happy</button>
+        <button onclick="playMoodGame('Anxious')">😰 Anxious</button>
+        <button onclick="playMoodGame('Sad')">😢 Sad</button>
+        <button onclick="playMoodGame('Irritable')">😠 Irritable</button>
+        <div class="tip" id="gameResponse"></div>
+      </div>
+    </section>
+
+    <!-- Ayurvedic Tip -->
+    <section>
+      <h2>🌿 Ayurvedic Wisdom</h2>
+      <div class="tip" id="ayurvedicTip">Loading Ayurvedic advice...</div>
+    </section>
+  </main>
+
+  <footer>© 2025 Menu-Track. All rights reserved.</footer>
+
+  <script>
+    // Elements
+    const entryForm = document.getElementById('entryForm');
+    const periodStartInput = document.getElementById('periodStart');
+    const periodHistoryList = document.getElementById('periodHistoryList');
+    const nextPeriodPrediction = document.getElementById('nextPeriodPrediction');
+    const ovulationPrediction = document.getElementById('ovulationPrediction');
+    const fertileWindowPrediction = document.getElementById('fertileWindowPrediction');
+    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+    const liveSuggestions = document.getElementById('liveSuggestions');
+    const moodAdvice = document.getElementById('moodAdvice');
+    const cycleStageSpan = document.getElementById('cycleStage');
+    const playlistDiv = document.getElementById('musicPlaylist');
+    const dailyChallengeDiv = document.getElementById('dailyChallenge');
+    const exportBtn = document.getElementById('exportBtn');
+    const importFile = document.getElementById('importFile');
+    const cycleLengthInput = document.getElementById('cycleLength');
+    const ayurvedicTipDiv = document.getElementById('ayurvedicTip');
+    const gameResponse = document.getElementById('gameResponse');
+
+    let periodHistory = JSON.parse(localStorage.getItem('periodHistory')) || [];
+
+    const adviceMap = {
+      "Happy": "Celebrate it! Share your joy with others. 🌟",
+      "Sad": "Take time to rest and reflect. Watch a feel-good movie. 🎬",
+      "Anxious": "Ground yourself. Try yoga or light breathing. 🧘‍♀️",
+      "Irritable": "Step back, listen to calming tunes, and sip tea. 🍵",
+      "Calm": "Use this balance to journal or plan your week. 📓"
+    };
+
+  const indianPlaylists = {
+  "Menstrual": [
+    // Telugu
+    "'Samajavaragamana' – Ala Vaikunthapurramuloo (Relaxing Classical Vibes)",
+    "'Butta Bomma' – Ala Vaikunthapurramuloo (Feel-good Melodies)",
+    "'Vachindamma' – Geetha Govindam (Comfort Tune)",
+    // Hindi
+    "'Phir Le Aaya Dil' – Barfi! (Calming, introspective; supports emotional release)",
+    "'Dil Diyan Gallan' – Tiger Zinda Hai (Soothing romance; gentle emotional comfort)",
+    "'Tujh Mein Rab Dikhta Hai' – Rab Ne Bana Di Jodi (Warmth and emotional grounding)",
+    // English
+    "'Someone Like You' – Adele (Emotional release and calm)",
+    "'Fix You' – Coldplay (Healing and comfort)",
+    "'Let It Be' – The Beatles (Acceptance and soothing calm)"
+  ],
+  "Follicular": [
+    // Telugu
+    "'Seeti Maar' – DJ (Energetic, Dance Mood)",
+    "'Dethadi Dethadi' – Fidaa (Cheerful Folk Pop)",
+    "'Pilla Raa' – RX100 (Flirty & Confident)",
+    // Hindi
+    "'Zinda' – Bhaag Milkha Bhaag (Motivational, rebuilding energy)",
+    "'Gallan Goodiyan' – Dil Dhadakne Do (Upbeat social energy)",
+    "'Love You Zindagi' – Dear Zindagi (Fresh start, joy, lightness)",
+    // English
+    "'Happy' – Pharrell Williams (Joyful, uplifting energy)",
+    "'Walking on Sunshine' – Katrina & The Waves (Bright and cheerful)",
+    "'Can't Stop the Feeling!' – Justin Timberlake (Feel-good dance vibe)"
+  ],
+  "Ovulation": [
+    // Telugu
+    "'Blockbuster' – Sarrainodu (High-Energy Anthem)",
+    "'Ammadu Lets Do Kummudu' – Khaidi No. 150 (Bold & Fun)",
+    "'Mind Block' – Sarileru Neekevvaru (Confident & Upbeat)",
+    // Hindi
+    "'Desi Girl' – Dostana (Confidence, social peak)",
+    "'Sheila Ki Jawani' – Tees Maar Khan (Bold and expressive mood)",
+    "'Lat Lag Gayee' – Race 2 (High energy, flirtatious confidence)",
+    // English
+    "'Run the World (Girls)' – Beyoncé (Empowering and confident)",
+    "'Uptown Funk' – Mark Ronson ft. Bruno Mars (Bold, fun, energetic)",
+    "'Crazy in Love' – Beyoncé ft. Jay-Z (Bold and expressive energy)"
+  ],
+  "Luteal": [
+    // Telugu
+    "'Inkem Inkem Inkem Kaavale' – Geetha Govindam (Soothing & Soulful)",
+    "'Nee Kallalona' – Chakram (Emotional Ballad)",
+    "'Pranam' – Jaanu (Gentle, Reflective Mood)",
+    // Hindi
+    "'Agar Tum Saath Ho' – Tamasha (Supportive and reflective)",
+    "'Raabta' – Agent Vinod (Emotional connection, grounding)",
+    "'Kabira' – Yeh Jawaani Hai Deewani (Spiritual, soothing, inward energy)",
+    // English
+    "'Skinny Love' – Bon Iver (Reflective and gentle)",
+    "'Stay' – Rihanna ft. Mikky Ekko (Emotional, supportive)",
+    "'Someone You Loved' – Lewis Capaldi (Soulful, emotional grounding)"
+  ]
+};
+
+
+    const challenges = [
+      "💧 Stay hydrated with lemon water.",
+      "🚶‍♀️ Walk for 20 minutes outdoors.",
+      "📔 Reflect on 3 good things today.",
+      "🧘 Do a 10-minute guided meditation.",
+      "🥗 Eat a warm, nourishing homemade meal."
+    ];
+
+    const ayurvedicTips = [
+      "🌿 Favor warm, cooked foods during your cycle.",
+      "🛁 Take warm baths with essential oils.",
+      "☕ Sip ginger or tulsi tea to reduce cramps.",
+      "🧘‍♀️ Gentle yoga like Cat-Cow or Child's Pose helps.",
+      "🍽️ Avoid processed, cold, or spicy foods during menstruation."
+    ];
+
+    function getSelectedSymptoms() {
+      return [...document.querySelectorAll('input[name="symptom"]:checked')].map(cb => cb.value);
+    }
+
+    function getSelectedMoods() {
+      return [...document.querySelectorAll('#moodTags input[type="checkbox"]:checked')].map(cb => cb.value);
+    }
+
+    function getRemedies(symptoms) {
+      let remedies = [];
+      if (symptoms.includes("cramps")) remedies.push("Use a heating pad or ginger tea");
+      if (symptoms.includes("fatigue")) remedies.push("Take short naps, hydrate");
+      if (symptoms.includes("bloating")) remedies.push("Eat fennel seeds and avoid soda");
+      if (symptoms.includes("headache")) remedies.push("Massage temples with coconut oil");
+      if (symptoms.includes("mood swings")) remedies.push("Listen to music, practice mindfulness");
+      return remedies.length ? remedies.join("; ") : "No specific remedies.";
+    }
+
+    function calculateCycleStage(lastPeriodDate) {
+      const today = new Date();
+      const startDate = new Date(lastPeriodDate);
+      const diffDays = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+      if (diffDays < 0) return "Unknown";
+      if (diffDays <= 5) return "Menstrual";
+      else if (diffDays <= 12) return "Follicular";
+      else if (diffDays <= 16) return "Ovulation";
+      else if (diffDays <= 28) return "Luteal";
+      else return "Unknown";
+    }
+
+    function displayPlaylist(stage) {
+      if (indianPlaylists[stage]) {
+        playlistDiv.innerHTML = `<strong>Music Playlist (${stage}):</strong><ul>` +
+          indianPlaylists[stage].map(song => `<li>${song}</li>`).join('') + `</ul>`;
+      } else {
+        playlistDiv.textContent = "No playlist for this stage.";
+      }
+    }
+
+    function predictNextPeriod(history, cycleLen) {
+      if (history.length === 0) return "No data yet.";
+      const lastDate = new Date(history[history.length - 1].date);
+      lastDate.setDate(lastDate.getDate() + cycleLen);
+      return lastDate.toLocaleDateString();
+    }
+
+    function predictOvulation(nextPeriodStr) {
+      if (nextPeriodStr === "No data yet.") return "No data yet.";
+      const nextDate = new Date(nextPeriodStr);
+      nextDate.setDate(nextDate.getDate() - 14);
+      return nextDate.toLocaleDateString();
+    }
+
+    function predictFertileWindow(ovulationStr) {
+      if (ovulationStr === "No data yet.") return "No data yet.";
+      const ovulationDate = new Date(ovulationStr);
+      const start = new Date(ovulationDate);
+      start.setDate(start.getDate() - 5);
+      return `${start.toLocaleDateString()} - ${ovulationDate.toLocaleDateString()}`;
+    }
+
+    function displayHistory() {
+      periodHistoryList.innerHTML = '';
+      if (periodHistory.length === 0) {
+        periodHistoryList.innerHTML = '<li>No entries yet.</li>';
+        return;
+      }
+
+      periodHistory.slice().reverse().forEach(entry => {
+        const li = document.createElement('li');
+        li.textContent = `${entry.date} | Mood: ${entry.moodTags.join(', ') || "None"} | Symptoms: ${entry.symptoms.join(', ') || "None"}`;
+        periodHistoryList.appendChild(li);
+      });
+
+      const lastEntry = periodHistory[periodHistory.length - 1];
+      const stage = calculateCycleStage(lastEntry.date);
+      cycleStageSpan.textContent = stage;
+      displayPlaylist(stage);
+
+      const cycleLen = parseInt(cycleLengthInput.value);
+      const next = predictNextPeriod(periodHistory, cycleLen);
+      nextPeriodPrediction.textContent = next;
+      const ovul = predictOvulation(next);
+      ovulationPrediction.textContent = ovul;
+      fertileWindowPrediction.textContent = predictFertileWindow(ovul);
+
+      if (lastEntry.moodTags.length > 0) {
+        const advices = lastEntry.moodTags.map(m => adviceMap[m]).filter(Boolean);
+        moodAdvice.textContent = advices.join(" | ");
+      } else {
+        moodAdvice.textContent = "Select mood tags to get advice";
+      }
+    }
+
+    entryForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const date = periodStartInput.value;
+      if (!date) return alert("Enter a date.");
+      const symptoms = getSelectedSymptoms();
+      const moodTags = getSelectedMoods();
+      periodHistory.push({ date, symptoms, moodTags });
+      localStorage.setItem('periodHistory', JSON.stringify(periodHistory));
+      entryForm.reset();
+      displayHistory();
+      liveSuggestions.textContent = "Select symptoms to see remedies...";
+    });
+
+    document.getElementById('symptomsGroup').addEventListener('change', () => {
+      liveSuggestions.textContent = getRemedies(getSelectedSymptoms());
+    });
+
+    clearHistoryBtn.addEventListener('click', () => {
+      if (confirm("Clear all entries?")) {
+        periodHistory = [];
+        localStorage.removeItem('periodHistory');
+        displayHistory();
+      }
+    });
+
+    exportBtn.addEventListener('click', () => {
+      if (periodHistory.length === 0) return alert("No data to export.");
+      const blob = new Blob([JSON.stringify(periodHistory)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'periodHistory.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    importFile.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (!Array.isArray(data)) throw new Error("Invalid format");
+          data.forEach(entry => {
+            if (!periodHistory.some(e => e.date === entry.date)) periodHistory.push(entry);
+          });
+          localStorage.setItem('periodHistory', JSON.stringify(periodHistory));
+          displayHistory();
+        } catch (err) {
+          alert("Import failed: " + err.message);
+        }
+      };
+      reader.readAsText(file);
+      importFile.value = '';
+    });
+
+    function playMoodGame(feeling) {
+      gameResponse.textContent = adviceMap[feeling] || "Breathe and be kind to yourself.";
+    }
+
+    function showDailyChallenge() {
+      const idx = new Date().getDate() % challenges.length;
+      dailyChallengeDiv.textContent = challenges[idx];
+    }
+
+    function showAyurvedicTip() {
+      const idx = new Date().getDay() % ayurvedicTips.length;
+      ayurvedicTipDiv.textContent = ayurvedicTips[idx];
+    }
+
+    displayHistory();
+    showDailyChallenge();
+    showAyurvedicTip();
+  </script>
+</body>
+</html>
